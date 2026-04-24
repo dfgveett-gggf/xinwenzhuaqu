@@ -113,19 +113,11 @@ rss:
   # - 正整数：覆盖全局设置，只推送此天数内的文章
   # - 0：禁用此频道的新鲜度过滤，推送所有文章
   feeds:
-    - id: "hacker-news"
-      name: "Hacker News"
-      url: "https://hnrss.org/frontpage"
-
-    - id: "ruanyifeng"
-      name: "阮一峰的网络日志"
-      url: "http://www.ruanyifeng.com/blog/atom.xml"
-      enabled: false                  # 禁用
-      # max_age_days: 3               # 示例：推送 3 天内的文章（更新较慢的博客）
-     
     - id: "yahoo-finance"
       name: "雅虎财经"
       url: "https://finance.yahoo.com/news/rssindex"
+
+
 
     # 自定义源示例
     # - id: "custom-feed"
@@ -160,11 +152,11 @@ report:
   # 关键词模式分组排序方式（仅 keyword 模式生效）
   # true: 按 frequency_words.txt 的定义顺序排列
   # false: 按匹配到的热点条数排序（条数多的在前）
-  sort_by_position_first: false
+  sort_by_position_first: true
 
   rank_threshold: 5                   # 排名高亮阈值（影响展示强调，不改变抓取范围）
 
-  max_news_per_keyword: 0          # 每个关键词/标签最大显示数量（0=不限制，仅影响展示裁剪）
+  max_news_per_keyword: 0             # 每个关键词/标签最大显示数量（0=不限制，仅影响展示裁剪）
 
 
 # ===============================================================
@@ -219,7 +211,7 @@ ai_filter:
   # 全量重分类触发阈值（0~1）
   # change_ratio >= 此值：全量重分类；否则增量更新
   # 0.0 最准确最费；1.0 最省但可能陈旧；0.6 是平衡点
-  reclassify_threshold: 0.6
+  reclassify_threshold: 0.4
 
   # 以下提示词模板一般无需修改（不建议动）
 
@@ -251,34 +243,19 @@ display:
   #   1. 在此列表中
   #   2. 下方 regions 中对应开关为 true
   region_order:
-    - new_items                           # 1️⃣ 新增热点区域
-    - hotlist                             # 2️⃣ 热榜区域（关键词匹配 / AI 智能筛选）
-    - rss                                 # 3️⃣ RSS 订阅区域
-    - standalone                          # 4️⃣ 独立展示区
-    - ai_analysis                         # 5️⃣ AI 分析区域
-
-  # 推送区域开关
-  # 控制各区域是否启用（配合 region_order 使用）
+    - hotlist                       # 2️⃣ 热榜区域（关键词匹配 / AI 智能筛选）
+    - new_items                       # 1️⃣ 新增热点区域
+    - rss                       # 3️⃣ RSS 订阅区域
+    - standalone                       # 4️⃣ 独立展示区
+    - ai_analysis                       # 5️⃣ AI 分析区域
   regions:
-    hotlist: true                     # 热榜区域（关键词匹配 / AI 智能筛选）
-    new_items: false                   # 新增热点区域（含热榜新增 + RSS 新增）
-                                      # 注：热点词汇统计中的新增标记🆕不受此配置影响
-
-    rss: true                         # RSS 订阅区域
-                                      # 开启后将对 RSS 进行关键词分析并在通知中展示
-                                      # 关闭后跳过分析，但独立展示区不受影响
-
-    standalone: false                 # 独立展示区（完整热榜/RSS，不受关键词过滤）
-    ai_analysis: true                 # AI 分析区域
-
-  # 📋 独立展示区配置
-  # 用途：将指定平台的完整热榜/RSS 数据独立提取，不受关键词过滤影响
-  # 两个独立用途：
-  #   - 推送展示：由 regions.standalone 开关控制，在推送中单独展示完整热榜
-  #   - AI 分析：由 ai_analysis.include_standalone 开关控制，将完整数据送入 AI 做深度分析
-  # 两者共享此处的平台/RSS 配置，但开关互相独立（可只开 AI 分析、不推送展示）
+    hotlist: true # 热榜区域（关键词匹配 / AI 智能筛选）
+    new_items: false # 新增热点区域（含热榜新增 + RSS 新增）
+    rss: false # RSS 订阅区域
+    standalone: false # 独立展示区（完整热榜/RSS，不受关键词过滤）
+    ai_analysis: true # AI 分析区域
   standalone:
-    platforms: ["zhihu", "wallstreetcn-hot"]     # 热榜平台 ID 列表（如 ["zhihu", "weibo"]）
+    platforms: ["zhihu","bilibili-hot-search","thepaper","toutiao"] # 热榜平台 ID 列表（如 ["zhihu", "weibo"]）
     rss_feeds: []                     # RSS 源 ID 列表（如 ["hacker-news"]）
     max_items: 20                     # 每个源最多展示条数（0=不限制）
 
@@ -492,7 +469,7 @@ ai_analysis:
   #   - 推送 incremental（避免重复），AI 分析 current（看当前榜单变化）
   #   - 推送 current（实时热点），AI 分析 daily（全天总结）
   #
-  mode: "follow_report"
+  mode: "incremental"
 
   # 分析内容配置
   max_news_for_analysis: 150        # 热榜+RSS 合计参与分析的新闻数量上限（控制成本关键项）
